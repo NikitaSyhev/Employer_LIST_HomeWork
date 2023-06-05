@@ -10,48 +10,78 @@ namespace Employer_LIST_HOMEWORK
 {
     internal class Program
     {
+        static SQLiteConnection connection;
+        static SQLiteCommand command;
 
-        static EmployerList addEmployer(EmployerList emp) // метод добавления сотрудника
+        static public void DBConnect(string _DBname)
         {
-            string _name, _sex;
-            SQLiteCommand command = null; // создали переменную для создания команд в базе данных
-            SQLiteConnection connection = new SQLiteConnection(@"Data Source=employerList.db; "); //создали объект класса для БД
-            connection.Open(); // открыли соединение БД
+            try
+            {
+                connection = new SQLiteConnection("Data Source=" + _DBname + ";Version=3; FailIfMissing=False");
+                connection.Open();
+            }
+            catch (SQLiteException ex)
+            {
+                Console.WriteLine($"Ошибка доступа к базе данных. Исключение: {ex.Message}");
+            }
+        }
+
+        static void addEmployer(string _DBname) // метод добавления сотрудника
+        {
+           
+            string _name, _sex, _position;
+            int _age;
+            SQLiteConnection connection = new SQLiteConnection("Data Source=" + _DBname + ";Version=3; FailIfMissing=False");
+            connection.Open();
+            SQLiteCommand command = new SQLiteCommand( $"INSERT INTO Employer (Name, Age, Position) VALUES (@_name,@_age, @_position)", connection);
 
             Console.WriteLine("Введите имя сотрудника");
             _name = Console.ReadLine();
-            emp.SetName(_name);
+            
             do // сделали цикл ввода
             {
                 Console.WriteLine("Введите пол сотрудника: M - мужчина или W - женщика");
                 _sex = Console.ReadLine();
             } while (_sex.ToLower() != "m" && _sex.ToLower() != "w");
-            emp.SetSex(_sex);
-            Console.WriteLine("Введите год рождения в формате: 1990");
-            int _year = int.Parse(Console.ReadLine());
-            Console.WriteLine("Введите месяц рождения в формате: 01");
-            int _month = int.Parse(Console.ReadLine());
-            Console.WriteLine("Введите день рождения в формате: 01");
-            int _day = int.Parse(Console.ReadLine());
-            DateTime DateOfBirth = new DateTime(_year, _month, _day);
 
-            Console.WriteLine($"Мы записали сотрудника {_name}, пол: {_sex} и датой рождения: {DateOfBirth} в базу данных.");
+            do
+            {
+                Console.WriteLine("Введите возраст сотрудника ( от 14 до 65 ): ");
+                _age = int.Parse(Console.ReadLine());
+            } while (_age < 14 || _age >65);
 
-            command.CommandText = $"INSERT INTO People (Имя, Пол, Дата рождения) VALUES ({_name}, {_sex}, {DateOfBirth})";
-            command.Parameters.AddWithValue("name", _name);
-            command.Parameters.AddWithValue("sex", _sex);
-            command.Parameters.AddWithValue("Birth", DateOfBirth);
+            do // сделали цикл ввода
+            {
+                Console.WriteLine("Введите должность сотрудника: Manager или Worker");
+                _position = Console.ReadLine();
+            } while (_position.ToLower() != "manager" && _position.ToLower() != "worker");
+
+
+            Console.WriteLine($"Мы записали сотрудника: {_name}, \nпол: {_sex}, \nвозраст: {_age}, \nдолжность: {_position} в базу данных.");
+
+            command.Parameters.AddWithValue("@_name", _name);
+            command.Parameters.AddWithValue("@_age", _age);
+            command.Parameters.AddWithValue("@_position", _position);
+
+            
             connection.Close();
-            return emp;
+            
         }
 
         static void Main(string[] args)
         {
             EmployerList employer1 = new EmployerList();
-            addEmployer(employer1);
-            Console.WriteLine($"Имя {employer1.Name}");
-
-            // завтра записать в базу данных и освоить это дел
+            DBConnect("Employer.db");
+            command = new SQLiteCommand(connection)
+            {
+                CommandText = "CREATE TABLE IF NOT EXISTS [Employer]([id] INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE," + // создали БД
+                   " [Name], [Age] INTEGER, [Position] TEXT);"
+            };
+            command.ExecuteNonQuery();
+            Console.WriteLine("Таблица создана");
+            addEmployer("Employer.db");
+            
+            Console.ReadLine();
            
         }
     }
