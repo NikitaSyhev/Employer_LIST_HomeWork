@@ -62,17 +62,40 @@ namespace Employer_LIST_HOMEWORK
             command.Parameters.AddWithValue("@_name", _name);
             command.Parameters.AddWithValue("@_age", _age);
             command.Parameters.AddWithValue("@_position", _position);
-          //  command.Parameters.AddWithValue("@_position", _sex);
+          command.Parameters.AddWithValue("@_position", _sex);
 
 
             connection.Close();
 
         }
-        static void printEmployers()
+        static string printEmployers(string _DBname)  // в этом методе считываем данные с базы данных и выводим сотрудников по условию задачи
         {
+            string connectionString = $"Data Source={_DBname};Version=3;";
+            string query = "SELECT * FROM Employer;";
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+                using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                {
+                    using (SQLiteDataReader reader = command.ExecuteReader())
+                    {
+                        string result = "";
 
+                        while (reader.Read())
+                        {
+                            string name = reader.GetString(1);
+                            int age = reader.GetInt32(2);
+                            string position = reader.GetString(3);
+                            string sex = reader.GetString(4);
+                            result = name + " " + age + " " + position + sex;   
+                        }
+                        return result;
+                    }
+                    connection.Close();
+                }
+                
+            }
         }
-
 
         static void Main(string[] args)
         {
@@ -89,8 +112,25 @@ namespace Employer_LIST_HOMEWORK
             var cmd = new SQLiteCommand(querry, connection);
             //command.ExecuteNonQuery();
             connection.Close();
-            Console.WriteLine("Таблица создана");
-            addEmployer("Employer.db");
+            Console.WriteLine("Table created");
+            int choise;
+            
+            do
+            {
+                Console.WriteLine("Выберете действие:\n1 - добавить сотрудника.\n" +
+                                                      "2 - показать список сотрудников.\n" +
+                                                      "3 - показать расписание сотрудников.\n");
+                choise = int.Parse(Console.ReadLine());
+                switch (choise)
+                {
+                    case 1: addEmployer("Employer.db"); break;
+                    case 2: Console.WriteLine($"Выводим список сотрудников: {printEmployers("Employer.db")}"); break;
+
+                }
+                addEmployer("Employer.db");
+            } while (choise < 4 );
+            
+
 
             Console.ReadLine();
            
