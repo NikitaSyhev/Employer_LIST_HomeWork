@@ -63,13 +63,14 @@ namespace Employer_LIST_HOMEWORK
             command.Parameters.AddWithValue("@_age", _age);
             command.Parameters.AddWithValue("@_position", _position);
           command.Parameters.AddWithValue("@_position", _sex);
-
+           // command.ExecuteNonQuery();
 
             connection.Close();
 
         }
-        static string printEmployers(string _DBname)  // в этом методе считываем данные с базы данных и выводим сотрудников по условию задачи
+        static List<EmployerList> getDataFromDB(string _DBname)  // в этом методе считываем данные с базы данных и выводим сотрудников по условию задачи
         {
+            List<EmployerList> employerList = new List<EmployerList>();
             string connectionString = $"Data Source={_DBname};Version=3;";
             string query = "SELECT * FROM Employer;";
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
@@ -87,13 +88,43 @@ namespace Employer_LIST_HOMEWORK
                             int age = reader.GetInt32(2);
                             string position = reader.GetString(3);
                             string sex = reader.GetString(4);
-                            result = name + " " + age + " " + position + sex;   
+                            result = name + " " + age + " " + position + sex;
+                            EmployerList employer1 = new EmployerList(name, sex, age, position);
+                            employerList.Add(employer1);
+
                         }
-                        return result;
+                        return employerList;
                     }
-                    connection.Close();
+                   
                 }
                 
+            }
+        }
+
+        static void printScedule (List <EmployerList> employers) // принимает LIST сотрудников и выводим их график
+        {
+            for (int i = 0; i < employers.Count; i++)
+            {
+                if (employers[i].Age >= 14 && employers[i].Age <= 17)
+                {
+                    Console.WriteLine($"Сотрудник {employers[i].Name} работает по графику:  4-х часовой рабочий день 5/2.");
+                }
+                else
+                    if (employers[i].Age >= 18 && employers[i].Age <= 65 && employers[i].Position=="Manager")
+                {
+                    Console.WriteLine($"Сотрудник {employers[i].Name} работает по графику:  8-мичасовой рабочий день 5/2.");
+                }
+                else
+                    if (employers[i].Age >= 18 && employers[i].Age <= 65 && employers[i].Position == "Worker")
+                {
+                    Console.WriteLine($"Сотрудник {employers[i].Name} работает по графику:   12-ти часовые смены 2/2.");
+                }
+                else
+                    if (employers[i].Age >= 65)
+                {
+                    Console.WriteLine($"Сотрудник {employers[i].Name} работает по графику:   пенсионный возраст 8-мичасовой день, 4 рабочих дня в неделю.");
+                }
+
             }
         }
 
@@ -124,7 +155,8 @@ namespace Employer_LIST_HOMEWORK
                 switch (choise)
                 {
                     case 1: addEmployer("Employer.db"); break;
-                    case 2: Console.WriteLine($"Выводим список сотрудников: {printEmployers("Employer.db")}"); break;
+                    case 2: Console.WriteLine($"Выводим список сотрудников: {getDataFromDB("Employer.db")}");break;
+                    case 3: printScedule(getDataFromDB("Employer.db")); break;
 
                 }
                 addEmployer("Employer.db");

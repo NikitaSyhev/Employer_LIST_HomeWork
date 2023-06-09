@@ -15,15 +15,16 @@ namespace Employer_LIST_HOMEWORK
   
         private string name;
         private string sex;
-        private DateTime dateOfBirthday;
+        private int age;
         private string position;
-        public EmployerList()
+        public EmployerList(string _name, string _sex, int _age, string _position)
         {
-            name = "";
-            sex = "M";
-            DateTime dateOfBirthday = new DateTime(1950, 1, 1);
-            position = "Manager";
+            name = _name;
+            sex = _sex;
+            age = _age;
+            position = _position;
         }
+       
 
         public string Name { get { return name; } }
         public void SetName(string _name)
@@ -35,8 +36,14 @@ namespace Employer_LIST_HOMEWORK
         {
             this.sex = _sex;
         }
-        public DateTime Age { get { return dateOfBirthday; } }
-        
+
+        public int Age { get { return age; } }
+        public void setAge(int _age)
+        {
+            this.age = _age;
+        }
+
+
         public string Position { get { return position; } } 
         public void setPositoion (string _position)
         {
